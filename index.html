@@ -86,7 +86,11 @@ function analyze(){
 
   const last3=clean.slice(-3).join("");
   if(last3==="BBB"){
-    setStatus("BET BANKER","DRAGON B",true);return;
+  setStatus(
+  "แนะนำ: 🔴 เจ้ามือ",
+  วิเคราะห์จากแพทเทิร์น | ความมั่นใจ ${conf}%,
+  true
+);
   }
   if(last3==="PPP"){
     setStatus("BET PLAYER","DRAGON P",true);return;
@@ -138,4 +142,5 @@ function renderBigRoad(clean){
 }
 </script>
 </body>
+
 </html>
