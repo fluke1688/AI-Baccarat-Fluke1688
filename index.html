@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>AI Baccarat Offline</title>
+<style>
+body{
+  margin:0;background:#0b1220;color:#fff;
+  font-family:sans-serif;
+}
+.container{
+  max-width:420px;margin:auto;padding:15px;
+}
+.status{
+  text-align:center;font-size:26px;font-weight:bold;
+}
+.no{color:#ff4d4d;}
+.yes{color:#4dff88;}
+
+.buttons{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:10px;margin:15px 0;
+}
+button{
+  padding:18px;font-size:22px;border:none;
+  border-radius:10px;
+}
+.tie{grid-column:span 2;}
+
+.road{
+  display:grid;grid-template-columns:repeat(12,28px);
+  gap:4px;margin-bottom:15px;
+}
+.cell,.dot{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#1b2436;font-weight:bold;
+}
+.B{background:#ff4d4d;}
+.P{background:#4da3ff;}
+
+.big{grid-template-columns:repeat(20,28px);}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h2 style="text-align:center;">AI BACCARAT (OFFLINE)</h2>
+
+<div id="status" class="status no">NO BET</div>
+<p id="reason" style="text-align:center;">Waiting data</p>
+
+<div class="buttons">
+  <button onclick="add('B')">BANKER</button>
+  <button onclick="add('P')">PLAYER</button>
+  <button class="tie" onclick="add('T')">TIE</button>
+</div>
+
+<h3>Bead Road</h3>
+<div id="bead" class="road"></div>
+
+<h3>Big Road</h3>
+<div id="bigroad" class="road big"></div>
+
+</div>
+
+<script>
+let history=[];
+
+function add(r){
+  history.push(r);
+  analyze();
+}
+
+function analyze(){
+  const clean=history.filter(x=>x!=='T');
+
+  renderBead(clean);
+  renderBigRoad(clean);
+
+  if(clean.length<6){
+    setStatus("NO BET","DATA TOO SMALL",false);
+    return;
+  }
+
+  const last3=clean.slice(-3).join("");
+  if(last3==="BBB"){
+    setStatus("BET BANKER","DRAGON B",true);return;
+  }
+  if(last3==="PPP"){
+    setStatus("BET PLAYER","DRAGON P",true);return;
+  }
+
+  setStatus("NO BET","NO CLEAR PATTERN",false);
+}
+
+function setStatus(text,reason,ok){
+  const s=document.getElementById("status");
+  s.innerText=text;
+  s.className="status "+(ok?"yes":"no");
+  document.getElementById("reason").innerText=reason;
+}
+
+function renderBead(clean){
+  const b=document.getElementById("bead");
+  b.innerHTML="";
+  clean.slice(-60).forEach(r=>{
+    const d=document.createElement("div");
+    d.className="cell "+r;
+    d.textContent=r;
+    b.appendChild(d);
+  });
+}
+
+function buildBigRoad(clean){
+  const cols=[];
+  clean.forEach(r=>{
+    if(!cols.length){cols.push([r]);return;}
+    const c=cols[cols.length-1];
+    if(c[0]===r && c.length<6){c.push(r);}
+    else{cols.push([r]);}
+  });
+  return cols;
+}
+
+function renderBigRoad(clean){
+  const br=document.getElementById("bigroad");
+  br.innerHTML="";
+  buildBigRoad(clean).slice(-20).forEach(col=>{
+    for(let i=0;i<6;i++){
+      const d=document.createElement("div");
+      d.className="dot";
+      if(col[i])d.classList.add(col[i]);
+      br.appendChild(d);
+    }
+  });
+}
+</script>
+</body>
+</html>
