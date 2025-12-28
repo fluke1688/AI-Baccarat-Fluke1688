@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>AI BACCARAT FLUKE1688</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;font-family:Segoe UI,Arial;background:#020617;color:#e5e7eb}
+.header{text-align:center;padding:14px;font-size:22px;font-weight:bold;border-bottom:2px solid #1e293b}
+.container{max-width:700px;margin:auto;padding:12px}
+.card{background:#0f111a;border:1px solid #1e293b;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 4px 8px rgba(0,0,0,0.3)}
+.history{font-size:15px;min-height:36px;word-wrap:break-word}
+.b{color:#ef4444;font-weight:bold}
+.p{color:#3b82f6;font-weight:bold}
+.t{color:#10b981;font-weight:bold}
+.buttons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:6px}
+.btn{padding:16px;font-size:18px;font-weight:bold;border:none;border-radius:14px;color:white;cursor:pointer;transition:all .2s}
+.btn:hover{opacity:.85;transform:scale(1.03);}
+.banker{background:#dc2626}
+.player{background:#2563eb}
+.tie{background:#10b981;color:#020617}
+.undo{background:#475569}
+.reset{background:#64748b}
+.status{text-align:center;font-size:22px;font-weight:bold;margin-bottom:6px}
+.wait{color:#94a3b8}
+.play-b{color:#ef4444}
+.play-p{color:#3b82f6}
+.play-t{color:#10b981}
+.conf,.reason,.stats{ text-align:center;font-size:13px;color:#cbd5f5;margin-top:6px }
+.road-title{font-size:13px;color:#cbd5f5;margin-bottom:6px;margin-top:8px;cursor:pointer}
+.road{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.cell{width:100%;padding-top:100%;border-radius:50%;position:relative;transition:all .2s}
+.cell.b{background:#ef4444}
+.cell.p{background:#3b82f6}
+.cell.t{background:#10b981}
+.cell.empty{background:#020617;border:1px solid #1e293b;border-radius:6px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:6px 0}
+input,select{background:#020617;color:#e5e7eb;border:1px solid #1e293b;border-radius:8px;padding:6px;width:90px}
+label{font-size:13px;color:#cbd5f5}
+.footer{text-align:center;font-size:11px;color:#64748b;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="header">♠ AI BACCARAT FLUKE1688 ♠</div>
+<div class="container">
+
+<div class="card"><div id="his" class="history">ยังไม่มีข้อมูล</div></div>
+
+<div class="buttons">
+  <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>
+  <button class="btn player" onclick="add('P')">🔵 ผู้เล่น</button>
+  <button class="btn tie" onclick="add('T')">🟢 เสมอ</button>
+</div>
+<div class="buttons" style="margin-top:4px">
+  <button class="btn undo" onclick="undo()">ย้อนกลับ</button>
+  <button class="btn reset" onclick="resetData()">ล้างข้อมูล</button>
+</div>
+
+<div class="card">
+  <div class="row">
+    <label>โหมดการเล่น</label>
+    <select id="mode" onchange="analyzeAllRoads()">
+      <option value="follow">เล่นตาม</option>
+      <option value="contra">เล่นสวน</option>
+    </select>
+  </div>
+</div>
+
+<div class="card"><div class="road-title">Bead Road</div><div id="bead" class="road"></div></div>
+<div class="card"><div class="road-title">Big Road</div><div id="bigroad" class="road"></div></div>
+
+<div class="card">
+  <div id="status" class="status wait">กรอกผลครบ 10 ตาเพื่อวิเคราะห์</div>
+  <div id="conf" class="conf"></div>
+  <div id="reason" class="reason"></div>
+</div>
+
+<div class="footer">วิเคราะห์จากสถิติ, มังกรไหล, ปิงปอง และจุดตัด</div>
+</div>
+
+<script>
+let h=[];
+
+function renderHistory(){
+  const el=document.getElementById("his");
+  el.innerHTML=h.length?h.map(x=>x==='B'?'<span class="b">B</span>':x==='P'?'<span class="p">P</span>':'<span class="t">T</span>').join(" "):"ยังไม่มีข้อมูล";
+}
+
+function renderBead(){
+  const el=document.getElementById("bead"); el.innerHTML="";
+  h.slice(-60).forEach(x=>{
+    const d=document.createElement("div");
+    d.className="cell "+(x==='B'?'b':x==='P'?'p':'t');
+    el.appendChild(d);
+  });
+}
+
+function buildBigRoad(){
+  let grid=[], col=0, row=0, last=null;
+  h.forEach(v=>{
+    if(v==='T') return;
+    if(v!==last){col++; row=0;} else row++; last=v;
+    grid.push({col,row,v});
+  });
+  return grid;
+}
+
+function renderRoad(grid,id){
+  const el=document.getElementById(id); el.innerHTML="";
+  grid.slice(-60).forEach(g=>{
+    const d=document.createElement("div");
+    d.className="cell "+(g.v?g.v:'empty');
+    el.appendChild(d);
+  });
+}
+
+// วิเคราะห์แพทเทิร์น มังกรไหล / ปิงปอง / จุดตัด
+function detectPattern(){
+  const clean = h.filter(x=>x!=='T');
+  if(clean.length<10) return {pick:null, conf:0};
+
+  let pick=null, conf=50;
+  let last = clean[clean.length-1];
+  let streak = 1;
+
+  for(let i=clean.length-2;i>=0;i--){
+    if(clean[i]===last) streak++;
+    else break;
+  }
+
+  const cutPointsDragon = [4,5,10]; 
+  const cutPointsPingpong = [3,4,5,8]; 
+
+  let ppStreak = 1;
+  for(let i=clean.length-2;i>=0;i--){
+    if(clean[i]!==clean[i+1]) ppStreak++;
+    else break;
+  }
+
+  if(cutPointsDragon.includes(streak)){
+    pick = last==='B'?'P':'B'; 
+    conf = 85;
+  } else if(cutPointsPingpong.includes(ppStreak)){
+    pick = clean[clean.length-1]==='B'?'P':'B'; 
+    conf = 80;
+  } else if(streak>=3){
+    pick = last; 
+    conf = 70 + Math.floor(Math.random()*20);
+  } else {
+    const last2 = clean.slice(-2).join('');
+    const last3 = clean.slice(-3).join('');
+    const last6 = clean.slice(-6).join('');
+    if(last2==='PP') pick='B';
+    else if(last3==='BBB') pick='P';
+    else if(last6==='BBBBBB') pick='P';
+    else pick=Math.random()>'0.5'?'B':'P';
+    conf = 60 + Math.floor(Math.random()*20);
+  }
+
+  return {pick, conf};
+}
+
+function analyzeAllRoads(){
+  if(h.length<10){
+    document.getElementById("status").innerText="กรอกผลครบ 10 ตาเพื่อวิเคราะห์";
+    document.getElementById("status").className="status wait";
+    document.getElementById("conf").innerText="";
+    document.getElementById("reason").innerText="";
+    return;
+  }
+
+  const result = detectPattern();
+  let mainPick = result.pick;
+  let conf = result.conf;
+
+  if(document.getElementById("mode").value==='contra'){
+    if(mainPick==='B') mainPick='P';
+    else if(mainPick==='P') mainPick='B';
+  }
+
+  const s=document.getElementById("status");
+  if(mainPick==='B'){s.innerText="แนะนำ: 🔴 เจ้ามือ"; s.className="status play-b";}
+  else if(mainPick==='P'){s.innerText="แนะนำ: 🔵 ผู้เล่น"; s.className="status play-p";}
+
+  document.getElementById("conf").innerText=`ความมั่นใจ: ${conf}%`;
+  document.getElementById("reason").innerText="วิเคราะห์มังกรไหล / ปิงปอง / จุดตัด";
+}
+
+function add(r){h.push(r); renderHistory(); renderBead(); renderRoad(buildBigRoad(),"bigroad"); analyzeAllRoads();}
+function undo(){h.pop(); renderHistory(); renderBead(); renderRoad(buildBigRoad(),"bigroad"); analyzeAllRoads();}
+function resetData(){if(!confirm("ล้างข้อมูลทั้งหมด?")) return; h=[]; renderHistory(); renderBead(); renderRoad(buildBigRoad(),"bigroad"); analyzeAllRoads();}
+
+renderHistory(); renderBead(); renderRoad(buildBigRoad(),"bigroad"); analyzeAllRoads();
+</script>
+</body>
+</html>
