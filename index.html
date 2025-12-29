@@ -1,210 +1,196 @@
-<!DOCTYPE html>  <html lang="th">  
-<head>  
-<meta charset="UTF-8">  
-<title>AI BACCARAT FLUKE1688</title>  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<style>  
-body{  
-  margin:0;  
-  font-family: 'Segoe UI', Arial, sans-serif;  
-  background:#05020f;  
-  color:#e5e7eb;  
-}  
-.header{  
-  text-align:center;  
-  padding:20px;  
-  font-size:28px;  
-  font-weight:bold;  
-  color:#0ff;  
-  text-shadow:0 0 10px #0ff,0 0 20px #3b82f6,0 0 30px #0ff;  
-  border-bottom:4px solid #0ff;  
-}  
-.container{  
-  max-width:950px;  
-  margin:auto;  
-  padding:14px;  
-}  
-.card{  
-  background:#11121d;  
-  border:1px solid #1e293b;  
-  border-radius:20px;  
-  padding:18px;  
-  margin-bottom:16px;  
-  box-shadow:0 8px 16px rgba(0,255,255,0.3),0 4px 8px rgba(0,0,0,0.5);  
-  transition:all 0.3s;  
-}  
-.card:hover{  
-  box-shadow:0 12px 24px rgba(0,255,255,0.6),0 6px 12px rgba(0,0,0,0.6);  
-}  
-.history{  
-  font-size:20px;  
-  min-height:40px;  
-  word-wrap:break-word;  
-  letter-spacing:5px;  
-  text-align:center;  
-  padding:12px;  
-  border:2px solid #3b82f6;  
-  border-radius:14px;  
-  background:#0f111a;  
-  text-shadow:0 0 6px #3b82f6;  
-}  
-.b{color:#ff3b3b;font-weight:bold;text-shadow:0 0 6px #ff3b3b;}  
-.p{color:#3b82ff;font-weight:bold;text-shadow:0 0 6px #3b82ff;}  
-.t{color:#10b981;font-weight:bold;text-shadow:0 0 6px #10b981;}  
-.buttons{  
-  display:grid;  
-  grid-template-columns:repeat(3,1fr);  
-  gap:14px;  
-  margin-bottom:10px;  
-}  
-.btn{  
-  padding:20px;  
-  font-size:22px;  
-  font-weight:bold;  
-  border:none;  
-  border-radius:20px;  
-  cursor:pointer;  
-  transition:all 0.3s;  
-  box-shadow:0 6px 12px rgba(0,255,255,0.4);  
-  color:white;  
-}  
-.btn:hover{  
-  transform:scale(1.08);  
-  box-shadow:0 8px 16px rgba(0,255,255,0.6);  
-}  
-.banker{background:#ff1f1f;}  
-.player{background:#1f40ff;}  
-.tie{background:#10b981;color:#020617;}  
-.undo{background:#64748b;}  
-.reset{background:#475569;}  
-.status{  
-  text-align:center;  
-  font-size:28px;  
-  font-weight:bold;  
-  margin-bottom:12px;  
-  text-shadow:0 0 10px #0ff,0 0 20px #3b82f6;  
-}  
-.play-b{color:#ff3b3b;text-shadow:0 0 12px #ff3b3b;}  
-.play-p{color:#3b82ff;text-shadow:0 0 12px #3b82ff;}  
-.play-dragon{color:#3b82ff;text-shadow:0 0 12px #3b82ff;}  
-.play-pingpong{color:#facc15;text-shadow:0 0 12px #facc15;}  
-.conf,.reason{text-align:center;font-size:16px;color:#cbd5f5;margin-top:10px;}  
-.mode-buttons{display:flex;gap:16px;justify-content:center;margin-top:12px;}  
-.mode-btn{  
-  padding:12px 22px;  
-  font-size:18px;  
-  font-weight:bold;  
-  border:none;  
-  border-radius:18px;  
-  cursor:pointer;  
-  transition:all 0.3s;  
-  color:#e5e7eb;  
-  background:#1f2937;  
-  box-shadow:0 4px 8px rgba(0,255,255,0.3);  
-}  
-.mode-btn.active{  
-  background:#3b82f6;  
-  color:white;  
-  box-shadow:0 0 12px #3b82f6,0 0 20px #0ff;  
-}  
-.footer{text-align:center;font-size:13px;color:#64748b;margin-top:18px;text-shadow:0 0 4px #0ff;}  
-</style>  
-</head>  
-<body>  
-<div class="header">♠ AI BACCARAT FLUKE1688 ♠</div>  
-<div class="container">  <div class="card">  
-  <div id="status" class="status wait">กรอกไม้ B/P ครบ 10 ไม้เพื่อวิเคราะห์</div>  
-  <div id="conf" class="conf"></div>  
-  <div id="reason" class="reason"></div>  
-</div>  <div class="card">  
-  <div id="his" class="history">ยังไม่มีข้อมูล</div>  
-</div>  <div class="buttons">  
-  <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>  
-  <button class="btn player" onclick="add('P')">🔵 ผู้เล่น</button>  
-  <button class="btn tie" onclick="add('T')">🟢 เสมอ</button>  
-</div>  
-<div class="buttons">  
-  <button class="btn undo" onclick="undo()">ย้อนกลับ</button>  
-  <button class="btn reset" onclick="resetData()">ล้างข้อมูล</button>  
-</div>  <div class="card mode-buttons">  
-  <button class="mode-btn active" id="followBtn" onclick="setMode('follow')">เล่นตาม</button>  
-  <button class="mode-btn" id="contraBtn" onclick="setMode('contra')">เล่นสวน</button>  
-</div>  <div class="footer">วิเคราะห์จากสถิติ, จุดตัด และแพทเทิร์นเฉพาะ</div>  
-</div>  <script>  
-let h=[], predictions=[], mode='follow';  
-  
-function renderHistory(){  
-  const el=document.getElementById("his");  
-  el.innerHTML="";  
-  h.forEach(x=>{  
-    const span=document.createElement("span");  
-    span.textContent=x;  
-    span.className=x==='B'?'b':x==='P'?'p':'t';  
-    el.appendChild(span);  
-    el.appendChild(document.createTextNode(" "));  
-  });  
-}  
-  
-function detectPattern(){  
-  const clean=h.filter(x=>'B'===x || x==='P');  
-  if(clean.length<10) return {pick:null, conf:0};  
-  let pick=null, conf=50;  
-  let last=clean[clean.length-1];  
-  let streak=1;  
-  for(let i=clean.length-2;i>=0;i--){if(clean[i]===last) streak++; else break;}  
-  const cutPointsDragon=[4,5,10];  
-  const cutPointsPingpong=[3,4,5,8];  
-  let ppStreak=1;  
-  for(let i=clean.length-2;i>=0;i--){if(clean[i]!==clean[i+1]) ppStreak++; else break;}  
-  let type='normal';  
-  if(cutPointsDragon.includes(streak)){pick=last==='B'?'P':'B'; conf=85; type='dragon';}  
-  else if(cutPointsPingpong.includes(ppStreak)){pick=clean[clean.length-1]==='B'?'P':'B'; conf=80; type='pingpong';}  
-  else if(streak>=3){pick=last; conf=70+Math.floor(Math.random()*20);}  
-  else{  
-    const last2=clean.slice(-2).join('');  
-    const last3=clean.slice(-3).join('');  
-    const last5=clean.slice(-5).join('');  
-    const last6=clean.slice(-6).join('');  
-    if(last2==='PP') pick='B';  
-    else if(last3==='BBB') pick='P';  
-    else if(last5==='PBPBP') pick='P';  
-    else if(last6==='BBBBBB') pick='P';  
-    else pick=Math.random()>'0.5'?'B':'P';  
-    conf=60+Math.floor(Math.random()*20);  
-  }  
-  return {pick, conf, type};  
-}  
-  
-function analyzeAllRoads(){  
-  const validMoves=h.filter(x=>'B'===x || x==='P');  
-  if(validMoves.length<10){  
-    document.getElementById("status").innerText="กรอกไม้ B/P ครบ 10 ไม้เพื่อวิเคราะห์";  
-    document.getElementById("status").className="status wait";  
-    document.getElementById("conf").innerText="";  
-    document.getElementById("reason").innerText="";  
-    renderHistory();  
-    return;  
-  }  
-  const result=detectPattern();  
-  let mainPick=result.pick, conf=result.conf, type=result.type;  
-  if(mode==='contra'){ if(mainPick==='B') mainPick='P'; else if(mainPick==='P') mainPick='B'; }  
-  const s=document.getElementById("status");  
-  if(type==='dragon') s.className="status play-dragon";  
-  else if(type==='pingpong') s.className="status play-pingpong";  
-  else s.className=mainPick==='B'?"status play-b":"status play-p";  
-  s.innerText=mainPick==='B'?"แนะนำ: 🔴 เจ้ามือ":"แนะนำ: 🔵 ผู้เล่น";  
-  document.getElementById("conf").innerText=`ความมั่นใจ: ${conf}%`;  
-  document.getElementById("reason").innerText="วิเคราะห์จุดตัด / แพทเทิร์นเฉพาะ";  
-  predictions = predictions.slice(0,validMoves.length);  
-  predictions.push(mainPick);  
-  renderHistory();  
-}  
-  
-function add(r){h.push(r); analyzeAllRoads();}  
-function undo(){h.pop(); predictions.pop(); analyzeAllRoads();}  
-function resetData(){if(!confirm("ล้างข้อมูลทั้งหมด?")) return; h=[]; predictions=[]; analyzeAllRoads();}  
-function setMode(m){mode=m; document.getElementById('followBtn').classList.remove('active'); document.getElementById('contraBtn').classList.remove('active'); if(m==='follow') document.getElementById('followBtn').classList.add('active'); else document.getElementById('contraBtn').classList.add('active'); analyzeAllRoads();}  
-  
-renderHistory(); analyzeAllRoads();  
-</script>  </body>  
-</html>   
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>AI BACCARAT FLUKE1688</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;font-family:Segoe UI,Arial;background:#05020f;color:#e5e7eb;}
+.header{text-align:center;padding:18px;font-size:28px;font-weight:bold;color:#0ff;text-shadow:0 0 15px #0ff;border-bottom:3px solid #0ff;}
+.container{max-width:960px;margin:auto;padding:14px;}
+.card{background:#0f1220;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 0 18px rgba(0,255,255,.35);}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center;}
+.stat-box{background:#020617;border:1px solid #334155;border-radius:14px;padding:12px;}
+.stat-title{font-size:13px;color:#94a3b8;}
+.stat-value{font-size:24px;font-weight:bold;color:#0ff;}
+.status{text-align:center;font-size:30px;font-weight:bold;}
+.play-b{color:#ff3b3b;}
+.play-p{color:#3b82ff;}
+.conf{text-align:center;font-size:16px;color:#a5f3fc;margin-top:6px;}
+.history{text-align:center;font-size:22px;letter-spacing:6px;}
+.b{color:#ff3b3b;font-weight:bold;}
+.p{color:#3b82ff;font-weight:bold;}
+.t{color:#10b981;font-weight:bold;}
+.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.btn{padding:16px;font-size:20px;font-weight:bold;border:none;border-radius:18px;cursor:pointer;color:white;}
+.banker{background:#ff1f1f;}
+.player{background:#1f40ff;}
+.tie{background:#10b981;color:#020617;}
+.undo{background:#64748b;}
+.reset{background:#475569;}
+.mode{display:flex;gap:12px;justify-content:center;}
+.mode button{padding:10px 20px;border-radius:14px;border:none;font-weight:bold;cursor:pointer;background:#1f2937;color:#e5e7eb;}
+.mode .active{background:#0ff;color:#020617;box-shadow:0 0 12px #0ff;}
+.wrong-list{font-size:15px;line-height:1.6;color:#fecaca;}
+.footer{text-align:center;font-size:13px;color:#64748b;}
+</style>
+</head>
+<body>
+
+<div class="header">♠ AI BACCARAT FLUKE1688 ♠</div>
+<div class="container">
+
+<div class="card stats">
+  <div class="stat-box"><div class="stat-title">ไม้ที่นับ</div><div class="stat-value" id="count">0</div></div>
+  <div class="stat-box"><div class="stat-title">ชนะ</div><div class="stat-value" id="win">0</div></div>
+  <div class="stat-box"><div class="stat-title">แพ้</div><div class="stat-value" id="loss">0</div></div>
+  <div class="stat-box"><div class="stat-title">% แม่นยำ</div><div class="stat-value" id="acc">0%</div></div>
+</div>
+
+<div class="card mode">
+  <button id="follow" class="active" onclick="setMode('follow')">เล่นตาม</button>
+  <button id="contra" onclick="setMode('contra')">เล่นสวน</button>
+</div>
+
+<div class="card">
+  <div id="status" class="status">กรอก B/P ครบ 10 ไม้</div>
+  <div id="conf" class="conf"></div>
+</div>
+
+<div class="card"><div id="his" class="history">ยังไม่มีข้อมูล</div></div>
+
+<div class="buttons">
+  <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>
+  <button class="btn player" onclick="add('P')">🔵 ผู้เล่น</button>
+  <button class="btn tie" onclick="add('T')">🟢 เสมอ</button>
+</div>
+<div class="buttons">
+  <button class="btn undo" onclick="undo()">ย้อนกลับ</button>
+  <button class="btn reset" onclick="resetData()">ล้างข้อมูล</button>
+</div>
+
+<div class="card">
+  <b>❌ ไม้ที่ AI ทำนายผิด</b>
+  <div id="wrong" class="wrong-list">ยังไม่มี</div>
+</div>
+
+<div class="footer">AI Pattern • Contra Flip • Advanced Cut</div>
+</div>
+
+<script>
+let h=[], predictions=[], wrong=[];
+let win=0, loss=0, mode='follow', lastConf=0;
+let contraFlip='B';
+
+function detectPattern(){
+  const clean=h.filter(x=>x==='B'||x==='P');
+  if(clean.length<10) return null;
+
+  let last4=clean.slice(-4).join('');
+  let last7=clean.slice(-7).join('');
+  let last8=clean.slice(-8).join('');
+
+  if(last8==='BBBBBBBB'){ lastConf=82; return 'P'; }
+  if(last7==='PPPPPPP'){ lastConf=82; return 'B'; }
+  if(last4==='PBPB'){ lastConf=82; return 'B'; }
+  if(last4==='BPBP'){ lastConf=82; return 'P'; }
+
+  let last2=clean.slice(-2).join('');
+  if(last2==='PP'){ lastConf=75; return 'B'; }
+  if(last2==='BB'){ lastConf=75; return 'P'; }
+
+  let last=clean.at(-1);
+  let streak=1;
+  for(let i=clean.length-2;i>=0;i--){
+    if(clean[i]===last) streak++; else break;
+  }
+
+  if(streak>=4){ lastConf=85; return last==='B'?'P':'B'; }
+
+  lastConf=70;
+  return last;
+}
+
+function add(r){
+  if(predictions.length && r!=='T'){
+    let p=predictions.at(-1);
+    let hand=h.length+1;
+    if(p===r) win++;
+    else{
+      loss++;
+      wrong.push(`ไม้ที่ ${hand} : ทำนาย ${p} → ออก ${r}`);
+    }
+  }
+
+  h.push(r);
+  renderHistory();
+
+  if(r==='T' && predictions.length){
+    predictions[predictions.length-1]=predictions.at(-1)==='B'?'P':'B';
+    lastConf=Math.max(50,lastConf-5);
+    status.innerText=predictions.at(-1)==='B'?"แนะนำ: 🔴 เจ้ามือ":"แนะนำ: 🔵 ผู้เล่น";
+    conf.innerText=`ความมั่นใจ: ${lastConf}%`;
+    updateStats(); renderWrong();
+    return;
+  }
+
+  let pick=detectPattern();
+  if(pick){
+    if(mode==='contra'){
+      pick=contraFlip;
+      contraFlip=contraFlip==='B'?'P':'B';
+    }
+    predictions.push(pick);
+    status.className="status "+(pick==='B'?'play-b':'play-p');
+    status.innerText=pick==='B'?"แนะนำ: 🔴 เจ้ามือ":"แนะนำ: 🔵 ผู้เล่น";
+    conf.innerText=`ความมั่นใจ: ${lastConf}%`;
+  }
+
+  updateStats(); renderWrong();
+}
+
+function renderHistory(){
+  his.innerHTML="";
+  h.forEach(x=>{
+    let s=document.createElement("span");
+    s.textContent=x;
+    s.className=x==='B'?'b':x==='P'?'p':'t';
+    his.append(s," ");
+  });
+}
+function updateStats(){
+  let t=win+loss;
+  count.innerText=t;
+  winEl.innerText=win;
+  lossEl.innerText=loss;
+  acc.innerText=t?Math.round(win/t*100)+"%":"0%";
+}
+function renderWrong(){
+  wrongEl.innerHTML=wrong.length?wrong.join("<br>"):"ยังไม่มี";
+}
+function undo(){resetData();}
+function resetData(){
+  h=[];predictions=[];wrong=[];win=0;loss=0;contraFlip='B';
+  his.innerText="ยังไม่มีข้อมูล";
+  status.innerText="กรอก B/P ครบ 10 ไม้";
+  conf.innerText="";
+  updateStats(); renderWrong();
+}
+function setMode(m){
+  mode=m;
+  follow.classList.remove("active");
+  contra.classList.remove("active");
+  document.getElementById(m).classList.add("active");
+}
+
+const count=document.getElementById("count");
+const winEl=document.getElementById("win");
+const lossEl=document.getElementById("loss");
+const acc=document.getElementById("acc");
+const status=document.getElementById("status");
+const conf=document.getElementById("conf");
+const his=document.getElementById("his");
+const wrongEl=document.getElementById("wrong");
+</script>
+</body>
+</html>
