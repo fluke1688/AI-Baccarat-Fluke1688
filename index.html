@@ -128,8 +128,7 @@ function add(r){
   if(r==='T' && predictions.length){
     predictions[predictions.length-1]=predictions.at(-1)==='B'?'P':'B';
     lastConf=Math.max(50,lastConf-5);
-    status.innerText=predictions.at(-1)==='B'?"แนะนำ: 🔴 เจ้ามือ":"แนะนำ: 🔵 ผู้เล่น";
-    conf.innerText=`ความมั่นใจ: ${lastConf}%`;
+    showPrediction(predictions.at(-1));
     updateStats(); renderWrong();
     return;
   }
@@ -141,12 +140,50 @@ function add(r){
       contraFlip=contraFlip==='B'?'P':'B';
     }
     predictions.push(pick);
-    status.className="status "+(pick==='B'?'play-b':'play-p');
-    status.innerText=pick==='B'?"แนะนำ: 🔴 เจ้ามือ":"แนะนำ: 🔵 ผู้เล่น";
-    conf.innerText=`ความมั่นใจ: ${lastConf}%`;
+    showPrediction(pick);
   }
 
   updateStats(); renderWrong();
+}
+
+function undo(){
+  if(!h.length) return;
+
+  let removed=h.pop();
+
+  if(predictions.length){
+    let lastPred=predictions.pop();
+    if(removed!=='T'){
+      if(lastPred===removed) win--;
+      else{
+        loss--;
+        wrong.pop();
+      }
+    }
+  }
+
+  renderHistory();
+
+  let pick=detectPattern();
+  if(pick){
+    if(mode==='contra'){
+      pick=contraFlip;
+    }
+    predictions.push(pick);
+    showPrediction(pick);
+  }else{
+    status.innerText="กรอก B/P ครบ 10 ไม้";
+    conf.innerText="";
+  }
+
+  updateStats();
+  renderWrong();
+}
+
+function showPrediction(pick){
+  status.className="status "+(pick==='B'?'play-b':'play-p');
+  status.innerText=pick==='B'?"แนะนำ: 🔴 เจ้ามือ":"แนะนำ: 🔵 ผู้เล่น";
+  conf.innerText=`ความมั่นใจ: ${lastConf}%`;
 }
 
 function renderHistory(){
@@ -168,7 +205,6 @@ function updateStats(){
 function renderWrong(){
   wrongEl.innerHTML=wrong.length?wrong.join("<br>"):"ยังไม่มี";
 }
-function undo(){resetData();}
 function resetData(){
   h=[];predictions=[];wrong=[];win=0;loss=0;contraFlip='B';
   his.innerText="ยังไม่มีข้อมูล";
@@ -194,3 +230,4 @@ const wrongEl=document.getElementById("wrong");
 </script>
 </body>
 </html>
+
