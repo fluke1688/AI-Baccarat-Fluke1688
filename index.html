@@ -57,13 +57,16 @@ body{margin:0;font-family:Segoe UI,Arial;background:#05020f;color:#e5e7eb;}
   <div id="conf" class="conf"></div>
 </div>
 
-<div class="card"><div id="his" class="history">ยังไม่มีข้อมูล</div></div>
+<div class="card">
+  <div id="his" class="history">ยังไม่มีข้อมูล</div>
+</div>
 
 <div class="buttons">
   <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>
   <button class="btn player" onclick="add('P')">🔵 ผู้เล่น</button>
   <button class="btn tie" onclick="add('T')">🟢 เสมอ</button>
 </div>
+
 <div class="buttons">
   <button class="btn undo" onclick="undo()">ย้อนกลับ</button>
   <button class="btn reset" onclick="resetData()">ล้างข้อมูล</button>
@@ -78,156 +81,139 @@ body{margin:0;font-family:Segoe UI,Arial;background:#05020f;color:#e5e7eb;}
 </div>
 
 <script>
+const countEl=document.getElementById('count');
+const winEl=document.getElementById('win');
+const lossEl=document.getElementById('loss');
+const accEl=document.getElementById('acc');
+const statusEl=document.getElementById('status');
+const confEl=document.getElementById('conf');
+const hisEl=document.getElementById('his');
+const wrongEl=document.getElementById('wrong');
+const followBtn=document.getElementById('follow');
+const contraBtn=document.getElementById('contra');
+
 let h=[], predictions=[], wrong=[];
-let win=0, loss=0, mode='follow', lastConf=0;
-let contraFlip='B';
+let win=0, loss=0;
+let mode='follow', entry=false, lastConf=0;
+let dragonCount=0;
+
+const clean=()=>h.filter(x=>'B'===x||x==='P');
+
+function streak(arr){
+  let s=1,l=arr.at(-1);
+  for(let i=arr.length-2;i>=0;i--){if(arr[i]===l)s++;else break;}
+  return s;
+}
 
 function detectPattern(){
-  const clean=h.filter(x=>x==='B'||x==='P');
-  if(clean.length<10) return null;
+  const c=clean();
+  if(c.length<10){entry=false;dragonCount=0;return null;}
+  let last=c.at(-1);
+  let s=streak(c);
 
-  let last4=clean.slice(-4).join('');
-  let last7=clean.slice(-7).join('');
-  let last8=clean.slice(-8).join('');
+  // มังกร ≥4
+  if(s>=4){
+    dragonCount++;
+    if(dragonCount<=2){entry=true;lastConf=75;return last;}
+    if(dragonCount>=3){entry=true;lastConf=90;dragonCount=0;return last==='B'?'P':'B';}
+  }else dragonCount=0;
 
-  if(last8==='BBBBBBBB'){ lastConf=82; return 'P'; }
-  if(last7==='PPPPPPP'){ lastConf=82; return 'B'; }
-  if(last4==='PBPB'){ lastConf=82; return 'B'; }
-  if(last4==='BPBP'){ lastConf=82; return 'P'; }
+  let l2=c.slice(-2).join('');
+  let l3=c.slice(-3).join('');
+  let l6=c.slice(-6).join('');
 
-  let last2=clean.slice(-2).join('');
-  if(last2==='PP'){ lastConf=75; return 'B'; }
-  if(last2==='BB'){ lastConf=75; return 'P'; }
+  // แพทเทิร์นเฉพาะ
+  if(l6==='PBPBPB'){entry=true;lastConf=85;return 'P';}
+  if(l6==='BPBPBP'){entry=true;lastConf=85;return 'B';}
 
-  let last=clean.at(-1);
-  let streak=1;
-  for(let i=clean.length-2;i>=0;i--){
-    if(clean[i]===last) streak++; else break;
-  }
+  if(l2==='BB'){entry=true;lastConf=80;return 'P';}
+  if(l2==='PP'){entry=true;lastConf=80;return 'B';}
+  if(l3==='PPB'||l3==='BBP'){entry=true;lastConf=78;return 'P';}
 
-  if(streak>=4){ lastConf=85; return last==='B'?'P':'B'; }
-
+  entry=true;
   lastConf=70;
   return last;
 }
 
 function add(r){
-  if(predictions.length && r!=='T'){
-    let p=predictions.at(-1);
-    let hand=h.length+1;
-    if(p===r) win++;
-    else{
-      loss++;
-      wrong.push(`ไม้ที่ ${hand} : ทำนาย ${p} → ออก ${r}`);
-    }
-  }
-
   h.push(r);
   renderHistory();
 
+  if(predictions.length && entry && r!=='T'){
+    let p=predictions.at(-1);
+    if(p===r) win++;
+    else { loss++; wrong.push(`ไม้ ${h.length}: ${p}→${r}`); }
+  }
+
+  // T flip
   if(r==='T' && predictions.length){
-    predictions[predictions.length-1]=predictions.at(-1)==='B'?'P':'B';
-    lastConf=Math.max(50,lastConf-5);
-    showPrediction(predictions.at(-1));
+    let lastPred=predictions.at(-1);
+    lastPred = lastPred==='B'?'P':'B';
+    predictions[predictions.length-1] = lastPred;
+    lastConf = Math.max(50,lastConf-5);
+    showPrediction(lastPred);
     updateStats(); renderWrong();
     return;
   }
 
   let pick=detectPattern();
   if(pick){
-    if(mode==='contra'){
-      pick=contraFlip;
-      contraFlip=contraFlip==='B'?'P':'B';
-    }
+    if(mode==='contra'){pick=pick==='B'?'P':'B';}
     predictions.push(pick);
     showPrediction(pick);
-  }
-
-  updateStats(); renderWrong();
-}
-
-function undo(){
-  if(!h.length) return;
-
-  let removed=h.pop();
-
-  if(predictions.length){
-    let lastPred=predictions.pop();
-    if(removed!=='T'){
-      if(lastPred===removed) win--;
-      else{
-        loss--;
-        wrong.pop();
-      }
-    }
-  }
-
-  renderHistory();
-
-  let pick=detectPattern();
-  if(pick){
-    if(mode==='contra'){
-      pick=contraFlip;
-    }
-    predictions.push(pick);
-    showPrediction(pick);
-  }else{
-    status.innerText="กรอก B/P ครบ 10 ไม้";
-    conf.innerText="";
-  }
+  } else showWait();
 
   updateStats();
   renderWrong();
 }
 
-function showPrediction(pick){
-  status.className="status "+(pick==='B'?'play-b':'play-p');
-  status.innerText=pick==='B'?"แนะนำ: 🔴 เจ้ามือ":"แนะนำ: 🔵 ผู้เล่น";
-  conf.innerText=`ความมั่นใจ: ${lastConf}%`;
+function showPrediction(p){
+  statusEl.className='status '+(p==='B'?'play-b':'play-p');
+  statusEl.innerText=p==='B'?'แนะนำ: 🔴 เจ้ามือ':'แนะนำ: 🔵 ผู้เล่น';
+  confEl.innerText=`ความมั่นใจ ${lastConf}%`;
+}
+
+function showWait(){
+  statusEl.className='status';
+  statusEl.innerText=clean().length<10?'กรอก B/P ครบ 10 ไม้':'NO ENTRY';
+  confEl.innerText='';
+}
+
+function undo(){if(!h.length) return; h.pop(); resetData(true);}
+function resetData(keep=false){
+  if(!keep) h=[];
+  predictions=[];
+  wrong=[];
+  win=0; loss=0; entry=false; dragonCount=0;
+  renderHistory(); showWait(); updateStats(); renderWrong();
 }
 
 function renderHistory(){
-  his.innerHTML="";
-  h.forEach(x=>{
-    let s=document.createElement("span");
-    s.textContent=x;
-    s.className=x==='B'?'b':x==='P'?'p':'t';
-    his.append(s," ");
-  });
-}
-function updateStats(){
-  let t=win+loss;
-  count.innerText=t;
-  winEl.innerText=win;
-  lossEl.innerText=loss;
-  acc.innerText=t?Math.round(win/t*100)+"%":"0%";
-}
-function renderWrong(){
-  wrongEl.innerHTML=wrong.length?wrong.join("<br>"):"ยังไม่มี";
-}
-function resetData(){
-  h=[];predictions=[];wrong=[];win=0;loss=0;contraFlip='B';
-  his.innerText="ยังไม่มีข้อมูล";
-  status.innerText="กรอก B/P ครบ 10 ไม้";
-  conf.innerText="";
-  updateStats(); renderWrong();
-}
-function setMode(m){
-  mode=m;
-  follow.classList.remove("active");
-  contra.classList.remove("active");
-  document.getElementById(m).classList.add("active");
+  hisEl.innerHTML='';
+  if(!h.length){hisEl.textContent='ยังไม่มีข้อมูล'; return;}
+  h.forEach(x=>{let s=document.createElement('span'); s.textContent=x; s.className=x==='B'?'b':x==='P'?'p':'t'; hisEl.append(s,' ');});
 }
 
-const count=document.getElementById("count");
-const winEl=document.getElementById("win");
-const lossEl=document.getElementById("loss");
-const acc=document.getElementById("acc");
-const status=document.getElementById("status");
-const conf=document.getElementById("conf");
-const his=document.getElementById("his");
-const wrongEl=document.getElementById("wrong");
+function updateStats(){
+  let t=win+loss;
+  countEl.innerText=t;
+  winEl.innerText=win;
+  lossEl.innerText=loss;
+  accEl.innerText=t?Math.round(win/t*100)+'%':'0%';
+}
+
+function renderWrong(){
+  wrongEl.innerHTML=wrong.length?wrong.join('<br>'):'ยังไม่มี';
+}
+
+function setMode(m){
+  mode=m;
+  followBtn.classList.remove('active');
+  contraBtn.classList.remove('active');
+  (m==='follow'?followBtn:contraBtn).classList.add('active');
+}
 </script>
 </body>
 </html>
+
 
