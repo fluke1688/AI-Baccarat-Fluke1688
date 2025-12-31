@@ -57,16 +57,13 @@ body{margin:0;font-family:Segoe UI,Arial;background:#05020f;color:#e5e7eb;}
   <div id="conf" class="conf"></div>
 </div>
 
-<div class="card">
-  <div id="his" class="history">ยังไม่มีข้อมูล</div>
-</div>
+<div class="card"><div id="his" class="history">ยังไม่มีข้อมูล</div></div>
 
 <div class="buttons">
   <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>
   <button class="btn player" onclick="add('P')">🔵 ผู้เล่น</button>
   <button class="btn tie" onclick="add('T')">🟢 เสมอ</button>
 </div>
-
 <div class="buttons">
   <button class="btn undo" onclick="undo()">ย้อนกลับ</button>
   <button class="btn reset" onclick="resetData()">ล้างข้อมูล</button>
@@ -97,7 +94,7 @@ let win=0, loss=0;
 let mode='follow', entry=false, lastConf=0;
 let dragonCount=0;
 
-const clean=()=>h.filter(x=>'B'===x||x==='P');
+const clean=()=>h.filter(x=>x==='B'||x==='P');
 
 function streak(arr){
   let s=1,l=arr.at(-1);
@@ -108,27 +105,35 @@ function streak(arr){
 function detectPattern(){
   const c=clean();
   if(c.length<10){entry=false;dragonCount=0;return null;}
+
   let last=c.at(-1);
   let s=streak(c);
-
-  // มังกร ≥4
-  if(s>=4){
-    dragonCount++;
-    if(dragonCount<=2){entry=true;lastConf=75;return last;}
-    if(dragonCount>=3){entry=true;lastConf=90;dragonCount=0;return last==='B'?'P':'B';}
-  }else dragonCount=0;
-
   let l2=c.slice(-2).join('');
-  let l3=c.slice(-3).join('');
   let l6=c.slice(-6).join('');
 
-  // แพทเทิร์นเฉพาะ
+  /* ===== มังกร (PRIORITY สูงสุด) ===== */
+  if(s>=4){
+    dragonCount++;
+    if(dragonCount<=2){
+      entry=true; lastConf=75;
+      return last;
+    }
+    if(dragonCount>=3){
+      entry=true; lastConf=90;
+      dragonCount=0;
+      return last==='B'?'P':'B';
+    }
+  }else{
+    dragonCount=0;
+  }
+
+  /* ===== Ping Pong ===== */
   if(l6==='PBPBPB'){entry=true;lastConf=85;return 'P';}
   if(l6==='BPBPBP'){entry=true;lastConf=85;return 'B';}
 
-  if(l2==='BB'){entry=true;lastConf=80;return 'P';}
-  if(l2==='PP'){entry=true;lastConf=80;return 'B';}
-  if(l3==='PPB'||l3==='BBP'){entry=true;lastConf=78;return 'P';}
+  /* ===== สูตร 2 ตัด 2 ===== */
+  if(l2==='PP'){entry=true;lastConf=88;return 'B';}
+  if(l2==='BB'){entry=true;lastConf=88;return 'P';}
 
   entry=true;
   lastConf=70;
@@ -142,29 +147,26 @@ function add(r){
   if(predictions.length && entry && r!=='T'){
     let p=predictions.at(-1);
     if(p===r) win++;
-    else { loss++; wrong.push(`ไม้ ${h.length}: ${p}→${r}`); }
+    else{loss++;wrong.push(`ไม้ ${h.length}: ${p}→${r}`);}
   }
 
-  // T flip
   if(r==='T' && predictions.length){
-    let lastPred=predictions.at(-1);
-    lastPred = lastPred==='B'?'P':'B';
-    predictions[predictions.length-1] = lastPred;
-    lastConf = Math.max(50,lastConf-5);
-    showPrediction(lastPred);
-    updateStats(); renderWrong();
+    let p=predictions.at(-1)==='B'?'P':'B';
+    predictions[predictions.length-1]=p;
+    lastConf=Math.max(50,lastConf-5);
+    showPrediction(p);
+    updateStats();renderWrong();
     return;
   }
 
   let pick=detectPattern();
   if(pick){
-    if(mode==='contra'){pick=pick==='B'?'P':'B';}
+    if(mode==='contra') pick=pick==='B'?'P':'B';
     predictions.push(pick);
     showPrediction(pick);
-  } else showWait();
+  }else showWait();
 
-  updateStats();
-  renderWrong();
+  updateStats();renderWrong();
 }
 
 function showPrediction(p){
@@ -179,19 +181,23 @@ function showWait(){
   confEl.innerText='';
 }
 
-function undo(){if(!h.length) return; h.pop(); resetData(true);}
+function undo(){if(!h.length)return;h.pop();resetData(true);}
 function resetData(keep=false){
-  if(!keep) h=[];
-  predictions=[];
-  wrong=[];
-  win=0; loss=0; entry=false; dragonCount=0;
-  renderHistory(); showWait(); updateStats(); renderWrong();
+  if(!keep)h=[];
+  predictions=[];wrong=[];
+  win=0;loss=0;entry=false;dragonCount=0;
+  renderHistory();showWait();updateStats();renderWrong();
 }
 
 function renderHistory(){
   hisEl.innerHTML='';
-  if(!h.length){hisEl.textContent='ยังไม่มีข้อมูล'; return;}
-  h.forEach(x=>{let s=document.createElement('span'); s.textContent=x; s.className=x==='B'?'b':x==='P'?'p':'t'; hisEl.append(s,' ');});
+  if(!h.length){hisEl.textContent='ยังไม่มีข้อมูล';return;}
+  h.forEach(x=>{
+    let s=document.createElement('span');
+    s.textContent=x;
+    s.className=x==='B'?'b':x==='P'?'p':'t';
+    hisEl.append(s,' ');
+  });
 }
 
 function updateStats(){
@@ -214,4 +220,4 @@ function setMode(m){
 }
 </script>
 </body>
-</html>
+  </html>
