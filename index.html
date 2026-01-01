@@ -61,9 +61,10 @@ body{margin:0;font-family:Segoe UI,Arial;background:#05020f;color:#e5e7eb;}
   <div id="his" class="history">ยังไม่มีข้อมูล</div>
 </div>
 
+<!-- 🔽 แก้ตรงนี้อย่างเดียว : P ซ้าย / B ขวา -->
 <div class="buttons">
-  <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>
   <button class="btn player" onclick="add('P')">🔵 ผู้เล่น</button>
+  <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>
   <button class="btn tie" onclick="add('T')">🟢 เสมอ</button>
 </div>
 
@@ -96,7 +97,6 @@ let h=[], predictions=[], wrong=[];
 let win=0, loss=0;
 let mode='follow', entry=false, lastConf=0;
 let dragonCount=0;
-let forcePattern=false;
 
 const clean=()=>h.filter(x=>x==='B'||x==='P');
 
@@ -116,17 +116,11 @@ function detectPattern(){
   let l10=c.slice(-10).join('');
   let l11=c.slice(-11).join('');
 
-  /* ===== FIX ตามที่สั่ง ===== */
-  if(l11==='PPPPBBPBBBBB'){
-    entry=true;
-    lastConf=95;
-    forcePattern=true;
-    return 'P'; // เล่นตาม = P แน่นอน
-  }
-
+  if(l11==='PPPPBBPBBBBB'){entry=true;lastConf=95;return 'P';}
   if(l10==='BBBPBPBBPP'){entry=true;lastConf=92;return 'P';}
   if(l7==='PPPPBBP'){entry=true;lastConf=90;return 'B';}
   if(l10==='PPPPBBPBBB'){entry=true;lastConf=90;return 'B';}
+  if(l11==='PPPPBBPBBBBB'){entry=true;lastConf=93;return 'P';}
   if(l11==='PBBPPBBPPBB'){entry=true;lastConf=91;return 'B';}
 
   if(s>=4){
@@ -158,13 +152,20 @@ function add(r){
     else { loss++; wrong.push(`ไม้ ${h.length}: ${p}→${r}`); }
   }
 
+  if(r==='T' && predictions.length){
+    let lp=predictions.at(-1);
+    lp=lp==='B'?'P':'B';
+    predictions[predictions.length-1]=lp;
+    lastConf=Math.max(50,lastConf-5);
+    showPrediction(lp);
+    updateStats();renderWrong();
+    return;
+  }
+
   let pick=detectPattern();
   if(pick){
-    if(mode==='contra' && !forcePattern){
-      pick=pick==='B'?'P':'B';
-    }
+    if(mode==='contra') pick=pick==='B'?'P':'B';
     predictions.push(pick);
-    forcePattern=false;
     showPrediction(pick);
   }else showWait();
 
@@ -188,7 +189,7 @@ function undo(){if(!h.length)return;h.pop();resetData(true);}
 function resetData(k=false){
   if(!k)h=[];
   predictions=[];wrong=[];
-  win=0;loss=0;entry=false;dragonCount=0;forcePattern=false;
+  win=0;loss=0;entry=false;dragonCount=0;
   renderHistory();showWait();updateStats();renderWrong();
 }
 
@@ -223,4 +224,4 @@ function setMode(m){
 }
 </script>
 </body>
-  </html>
+</html>
