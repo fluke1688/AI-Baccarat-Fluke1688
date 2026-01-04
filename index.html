@@ -61,7 +61,6 @@ body{margin:0;font-family:Segoe UI,Arial;background:#05020f;color:#e5e7eb;}
   <div id="his" class="history">ยังไม่มีข้อมูล</div>
 </div>
 
-<!-- 🔽 แก้ตรงนี้อย่างเดียว : P ซ้าย / B ขวา -->
 <div class="buttons">
   <button class="btn player" onclick="add('P')">🔵 ผู้เล่น</button>
   <button class="btn banker" onclick="add('B')">🔴 เจ้ามือ</button>
@@ -78,7 +77,7 @@ body{margin:0;font-family:Segoe UI,Arial;background:#05020f;color:#e5e7eb;}
   <div id="wrong" class="wrong-list">ยังไม่มี</div>
 </div>
 
-<div class="footer">AI Pattern • Contra Flip • Advanced Cut</div>
+<div class="footer">AI Pattern • Dragon • Pingpong</div>
 </div>
 
 <script>
@@ -96,46 +95,79 @@ const contraBtn=document.getElementById('contra');
 let h=[], predictions=[], wrong=[];
 let win=0, loss=0;
 let mode='follow', entry=false, lastConf=0;
-let dragonCount=0;
+
+/* ===== DRAGON STATE ===== */
+let dragonActive=false;
+let dragonFollowed=false;
 
 const clean=()=>h.filter(x=>x==='B'||x==='P');
 
 function streak(arr){
-  let s=1,l=arr.at(-1);
-  for(let i=arr.length-2;i>=0;i--){if(arr[i]===l)s++;else break;}
+  let s=1,last=arr.at(-1);
+  for(let i=arr.length-2;i>=0;i--){
+    if(arr[i]===last) s++;
+    else break;
+  }
   return s;
 }
 
 function detectPattern(){
   const c=clean();
-  if(c.length<10){entry=false;dragonCount=0;return null;}
+  if(c.length<10){
+    entry=false;
+    dragonActive=false;
+    dragonFollowed=false;
+    return null;
+  }
 
   let last=c.at(-1);
   let s=streak(c);
-  let l7=c.slice(-7).join('');
-  let l10=c.slice(-10).join('');
-  let l11=c.slice(-11).join('');
-
-  if(l11==='PPPPBBPBBBBB'){entry=true;lastConf=95;return 'P';}
-  if(l10==='BBBPBPBBPP'){entry=true;lastConf=92;return 'P';}
-  if(l7==='PPPPBBP'){entry=true;lastConf=90;return 'B';}
-  if(l10==='PPPPBBPBBB'){entry=true;lastConf=90;return 'B';}
-  if(l11==='PPPPBBPBBBBB'){entry=true;lastConf=93;return 'P';}
-  if(l11==='PBBPPBBPPBB'){entry=true;lastConf=91;return 'B';}
-
-  if(s>=4){
-    dragonCount++;
-    if(dragonCount<=2){entry=true;lastConf=75;return last;}
-    if(dragonCount>=3){entry=true;lastConf=90;dragonCount=0;return last==='B'?'P':'B';}
-  }else dragonCount=0;
-
-  let l2=c.slice(-2).join('');
   let l6=c.slice(-6).join('');
+  let l2=c.slice(-2).join('');
 
-  if(l6==='PBPBPB'){entry=true;lastConf=85;return 'P';}
-  if(l6==='BPBPBP'){entry=true;lastConf=85;return 'B';}
-  if(l2==='PP'){entry=true;lastConf=80;return 'B';}
-  if(l2==='BB'){entry=true;lastConf=80;return 'P';}
+  /* ===== 🐉 DRAGON : ตาม 1 / ตัด 1 ===== */
+  if(s>=3){
+    if(!dragonActive){
+      dragonActive=true;
+      dragonFollowed=false;
+    }
+
+    if(dragonActive && !dragonFollowed){
+      dragonFollowed=true;
+      entry=true; lastConf=75;
+      return last;          // ตาม 1
+    }
+
+    if(dragonActive && dragonFollowed){
+      dragonActive=false;
+      dragonFollowed=false;
+      entry=true; lastConf=85;
+      return last==='B'?'P':'B'; // ตัด
+    }
+  }else{
+    dragonActive=false;
+    dragonFollowed=false;
+  }
+
+  /* ===== 🔁 PINGPONG ตาม 1 ===== */
+  if(l6==='BPBPBP'){
+    entry=true; lastConf=85;
+    return 'B';
+  }
+  if(l6==='PBPBPB'){
+    entry=true; lastConf=85;
+    return 'P';
+  }
+
+  /* ===== 2–2 ===== */
+  if(l2==='PP'){
+    entry=true; lastConf=80;
+    return 'B';
+  }
+  if(l2==='BB'){
+    entry=true; lastConf=80;
+    return 'P';
+  }
 
   entry=true;
   lastConf=70;
@@ -152,15 +184,7 @@ function add(r){
     else { loss++; wrong.push(`ไม้ ${h.length}: ${p}→${r}`); }
   }
 
-  if(r==='T' && predictions.length){
-    let lp=predictions.at(-1);
-    lp=lp==='B'?'P':'B';
-    predictions[predictions.length-1]=lp;
-    lastConf=Math.max(50,lastConf-5);
-    showPrediction(lp);
-    updateStats();renderWrong();
-    return;
-  }
+  if(r==='T'){updateStats();renderWrong();return;}
 
   let pick=detectPattern();
   if(pick){
@@ -189,7 +213,9 @@ function undo(){if(!h.length)return;h.pop();resetData(true);}
 function resetData(k=false){
   if(!k)h=[];
   predictions=[];wrong=[];
-  win=0;loss=0;entry=false;dragonCount=0;
+  win=0;loss=0;entry=false;
+  dragonActive=false;
+  dragonFollowed=false;
   renderHistory();showWait();updateStats();renderWrong();
 }
 
