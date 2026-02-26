@@ -1,456 +1,1096 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>HACKER AI BACCARAT • HACK BY FLUKE1688</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>77K • Cyber Overlay (WIN/LOSE + Stats)</title>
 <style>
+:root{
+  --bg:#070a12;
+  --panel:rgba(9,12,24,.72);
+  --cyan:#45e3ff;
+  --blue:#2f6bff;
+  --purple:#b64bff;
+  --green:#39ff88;
+  --red:#ff4b4b;
+  --white:#eaf6ff;
+  --muted:rgba(234,246,255,.65);
+  --glow:0 0 22px rgba(69,227,255,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
 body{
   margin:0;
-  font-family:Consolas,monospace;
-  background:black;
-  color:#22c55e;
+  background: radial-gradient(1200px 800px at 40% 10%, rgba(47,107,255,.20), transparent 55%),
+              radial-gradient(900px 700px at 80% 30%, rgba(182,75,255,.16), transparent 55%),
+              radial-gradient(900px 700px at 20% 90%, rgba(69,227,255,.10), transparent 55%),
+              var(--bg);
+  color:var(--white);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans Thai", sans-serif;
   overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
 }
-canvas{
+
+/* background particles (no pointer) */
+canvas#bg{
+  position:fixed; inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:.9;
+}
+
+.overlayRoot{
   position:fixed;
   inset:0;
-  z-index:-1;
+  z-index:5;
+  pointer-events:none; /* overlay ไม่บล็อคการกดของหน้าเว็บด้านหลัง */
 }
-.app{
-  max-width:420px;
-  margin:20px auto;
-  padding:16px;
-  background:rgba(0,0,0,.78);
-  border:1px solid #22c55e;
-  border-radius:14px;
-}
-.header{
-  text-align:center;
-  font-size:22px;
-  font-weight:900;
-  margin-bottom:6px;
-  cursor:pointer;
-}
-.sub{
-  text-align:center;
-  font-size:12px;
-  opacity:.7;
-  margin-bottom:10px;
-}
-.pred{
-  text-align:center;
-  padding:14px;
-  border:1px solid #22c55e;
-  border-radius:14px;
-  margin-bottom:8px;
-}
-.pred.glitch{
-  animation:glitch .15s infinite alternate;
-}
-@keyframes glitch{
-  from{filter:hue-rotate(0deg)}
-  to{filter:hue-rotate(40deg)}
-}
-.pred .icon{font-size:38px}
-.pred .text{font-size:26px;font-weight:900}
-.pred .pct{font-size:18px}
 
-.status{
-  font-size:13px;
-  text-align:center;
-  margin:6px 0;
-}
-.progress{
-  height:8px;
-  background:#022c22;
-  border-radius:6px;
+/* ===== Mini App (floating phone UI) ===== */
+.app{
+  pointer-events:auto; /* เฉพาะตัวแอปกดได้ */
+  position:fixed;
+  left:22px;
+  top:90px;
+  width:min(340px, 90vw);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(8,10,18,.75), rgba(10,12,22,.68));
+  border:1px solid rgba(69,227,255,.45);
+  box-shadow: 0 25px 55px rgba(0,0,0,.55), var(--glow);
   overflow:hidden;
+  backdrop-filter: blur(8px);
+}
+
+.appHeader{
+  padding:12px 12px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid rgba(69,227,255,.18);
+  background:linear-gradient(180deg, rgba(69,227,255,.10), transparent);
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:900;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  font-size:13px;
+}
+.logoDot{
+  width:10px;height:10px;border-radius:999px;
+  background:linear-gradient(180deg, var(--cyan), var(--blue));
+  box-shadow:0 0 14px rgba(69,227,255,.55);
+}
+.chip{
+  font-size:12px;
+  padding:5px 10px;
+  border-radius:999px;
+  border:1px solid rgba(69,227,255,.35);
+  color:var(--muted);
+  background:rgba(0,0,0,.25);
+  white-space:nowrap;
+}
+.chipStrong{
+  color:rgba(234,246,255,.92);
+  border-color:rgba(69,227,255,.45);
+}
+
+.topRow{
+  padding:10px 12px 0;
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:10px;
+  align-items:center;
+}
+select{
+  width:100%;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(69,227,255,.30);
+  color:var(--white);
+  border-radius:12px;
+  padding:10px 10px;
+  outline:none;
+}
+.modePill{
+  padding:9px 10px;
+  border-radius:12px;
+  border:1px solid rgba(69,227,255,.30);
+  background:rgba(0,0,0,.25);
+  font-size:12px;
+  color:var(--muted);
+}
+
+.core{ padding:10px 12px 12px; }
+
+/* ===== Dial / Prediction ===== */
+.dialCard{
+  border-radius:16px;
+  border:1px solid rgba(69,227,255,.28);
+  background: radial-gradient(520px 260px at 50% 20%, rgba(69,227,255,.10), transparent 60%),
+              rgba(0,0,0,.22);
+  padding:12px;
+  position:relative;
+  overflow:hidden;
+}
+.netLines{
+  position:absolute; inset:-30px;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(69,227,255,.20), transparent 45%),
+    radial-gradient(circle at 70% 60%, rgba(182,75,255,.18), transparent 45%),
+    linear-gradient(90deg, rgba(69,227,255,.10), transparent 55%);
+  opacity:.35;
+  pointer-events:none;
+}
+.dialTop{
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   margin-bottom:10px;
 }
-.progress div{
+.smallTag{font-size:12px;color:var(--muted)}
+.pctTag{
+  font-weight:900;
+  font-size:14px;
+  color:var(--cyan);
+  text-shadow:0 0 16px rgba(69,227,255,.35);
+}
+
+/* ring */
+.ringWrap{
+  position:relative;
+  width:178px;
+  height:178px;
+  margin:8px auto 10px;
+  display:grid;
+  place-items:center;
+}
+.ring{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,.45) 0 55%, transparent 56%),
+    conic-gradient(from 180deg, rgba(69,227,255,.05), rgba(69,227,255,.25), rgba(182,75,255,.18), rgba(69,227,255,.10));
+  border:1px solid rgba(69,227,255,.28);
+  box-shadow: inset 0 0 18px rgba(69,227,255,.10), 0 0 22px rgba(69,227,255,.18);
+}
+.ring::after{
+  content:"";
+  position:absolute; inset:10px;
+  border-radius:999px;
+  border:1px dashed rgba(234,246,255,.18);
+  opacity:.65;
+}
+.pulse{
+  position:absolute; inset:-18px;
+  border-radius:999px;
+  border:2px solid rgba(69,227,255,.18);
+  animation:pulse 2.3s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(.96); opacity:.55}
+  50%{transform:scale(1.04); opacity:.95}
+}
+
+.pick{
+  position:relative;
+  width:112px;height:112px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  border:2px solid rgba(69,227,255,.45);
+  background: radial-gradient(circle at 30% 20%, rgba(69,227,255,.18), rgba(0,0,0,.55) 70%);
+  box-shadow:0 0 20px rgba(69,227,255,.20);
+}
+.pick .letter{
+  font-weight:1000;
+  font-size:46px;
+  letter-spacing:.5px;
+  text-shadow:0 0 18px rgba(69,227,255,.35);
+}
+.pick .label{
+  margin-top:-8px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.bar{
+  position:relative;
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+  border:1px solid rgba(69,227,255,.18);
+}
+.bar > div{
   height:100%;
   width:0%;
-  background:#22c55e;
-  transition:width .12s linear;
+  background:linear-gradient(90deg, rgba(69,227,255,.35), rgba(47,107,255,.75), rgba(182,75,255,.55));
+  box-shadow:0 0 20px rgba(69,227,255,.22);
+  transition:width .25s ease;
+}
+.hint{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+  position:relative;
+  min-height: 16px;
 }
 
-.history,.dna{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  justify-content:center;
-  margin-bottom:8px;
+/* ===== Buttons row (TIE / LOSE / WIN) ===== */
+.btnRow{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
 }
-.box{
-  width:32px;height:32px;
-  border:1px solid #22c55e;
+.btnRound{
+  border-radius:999px;
+  padding:12px 10px;
+  border:1px solid rgba(234,246,255,.18);
+  background:rgba(0,0,0,.22);
+  color:var(--white);
+  font-weight:900;
+  cursor:pointer;
+  touch-action:manipulation;
+  box-shadow: inset 0 0 12px rgba(69,227,255,.08);
+}
+.btnRound:active{transform:scale(.98)}
+.btnWin{border-color:rgba(57,255,136,.45); box-shadow:0 0 18px rgba(57,255,136,.12)}
+.btnLose{border-color:rgba(255,75,75,.42); box-shadow:0 0 18px rgba(255,75,75,.10)}
+.btnTie{border-color:rgba(69,227,255,.35); box-shadow:0 0 18px rgba(69,227,255,.10)}
+.btnRound small{display:block; font-size:11px; opacity:.75; margin-top:2px}
+
+/* ===== Stats row ===== */
+.stats{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+.statBox{
+  border-radius:14px;
+  border:1px solid rgba(69,227,255,.22);
+  background:rgba(0,0,0,.22);
+  padding:10px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:rgba(234,246,255,.80);
+  font-size:12px;
+}
+.statBox b{
+  font-size:14px;
+  color:var(--white);
+}
+.statWide{
+  grid-column:1 / span 2;
+  justify-content:flex-start;
+  gap:8px;
+}
+.badgeTiny{
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(69,227,255,.22);
+  background:rgba(0,0,0,.18);
+  color:rgba(234,246,255,.70);
+  font-size:11px;
+}
+.footer{
+  padding:10px 12px 12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  font-size:11px;
+  color:rgba(234,246,255,.55);
+  border-top:1px solid rgba(69,227,255,.14);
+}
+.footerRight{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.linkBtn{
+  pointer-events:auto;
+  border:1px solid rgba(69,227,255,.22);
+  background:rgba(0,0,0,.18);
+  color:rgba(234,246,255,.75);
+  border-radius:999px;
+  padding:8px 10px;
+  font-size:11px;
+  cursor:pointer;
+}
+.linkBtn:active{transform:scale(.98)}
+
+/* ===== Big centered pop message ===== */
+.pop{
+  position:fixed;
+  inset:0;
+  z-index:50;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight:900;
+  pointer-events:none;
 }
-.P{color:#22c55e}
-.B{color:#ef4444}
-.T{color:#38bdf8}
-.win{color:#22c55e}
-.lose{color:#ef4444}
-
-.panel{
-  border:1px solid #22c55e;
-  border-radius:10px;
-  padding:8px;
-  font-size:13px;
-  margin-bottom:8px;
+.popCard{
+  width:min(86vw, 520px);
+  background:rgba(255,255,255,.96);
+  color:#111;
+  border-radius:18px;
+  padding:16px;
   text-align:center;
+  box-shadow:0 22px 60px rgba(0,0,0,.55);
+  transform:translateY(10px) scale(.98);
+  opacity:0;
+  transition:opacity .18s ease, transform .18s ease;
+  border:2px solid rgba(0,0,0,.07);
 }
+.popCard.show{opacity:1; transform:translateY(0) scale(1)}
+.popTitle{font-weight:900; font-size:16px; margin-bottom:6px}
+.popBig{font-weight:1000; font-size:44px; letter-spacing:.5px}
+.popSub{font-size:12px; opacity:.75; margin-top:6px}
 
-.controls,.voice{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin-bottom:8px;
-}
-button{
-  padding:10px;
-  background:black;
-  color:#22c55e;
-  border:1px solid #22c55e;
-  cursor:pointer;
-  font-weight:900;
-}
-button:disabled{
-  opacity:.4;
-  cursor:not-allowed;
-}
-
-.footer{
-  text-align:center;
+/* drag hint */
+.dragHint{
+  position:fixed;
+  right:10px;
+  bottom:10px;
+  z-index:10;
   font-size:11px;
-  opacity:.6;
+  color:rgba(234,246,255,.55);
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(69,227,255,.18);
+  border-radius:12px;
+  padding:8px 10px;
+  pointer-events:none;
 }
-.pulse{
-  animation:pulse 1s infinite;
+.appDragHandle{ cursor:grab; user-select:none; }
+
+/* ===== LOGIN LAYER ===== */
+.loginLayer{
+  position:fixed; inset:0;
+  z-index:80;
+  display:none;
+  pointer-events:auto;
+  background:
+    radial-gradient(900px 700px at 60% 25%, rgba(47,107,255,.18), transparent 55%),
+    radial-gradient(900px 700px at 30% 85%, rgba(182,75,255,.12), transparent 60%),
+    rgba(0,0,0,.35);
+  backdrop-filter: blur(10px);
 }
-@keyframes pulse{
-  0%{box-shadow:0 0 0 #22c55e}
-  50%{box-shadow:0 0 12px #22c55e}
-  100%{box-shadow:0 0 0 #22c55e}
+.loginWrap{
+  width:min(92vw, 420px);
+  margin: 0 auto;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
 }
-.alert{
-  background:#300 !important;
+.loginCard{
+  border-radius:22px;
+  border:1px solid rgba(69,227,255,.28);
+  background:linear-gradient(180deg, rgba(8,10,18,.88), rgba(10,12,22,.78));
+  box-shadow: 0 35px 80px rgba(0,0,0,.6), var(--glow);
+  overflow:hidden;
 }
+.loginTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:14px 14px 12px;
+  border-bottom:1px solid rgba(69,227,255,.14);
+  background:linear-gradient(180deg, rgba(69,227,255,.10), transparent);
+}
+.loginTitleRow{
+  display:flex; align-items:center; gap:10px;
+  font-weight:900;
+  letter-spacing:.6px;
+}
+.loginDot{
+  width:10px;height:10px;border-radius:999px;
+  background:linear-gradient(180deg, var(--cyan), var(--blue));
+  box-shadow:0 0 14px rgba(69,227,255,.55);
+}
+.loginBadge{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(69,227,255,.25);
+  color:rgba(234,246,255,.75);
+  background:rgba(0,0,0,.25);
+  white-space:nowrap;
+}
+.loginBody{
+  padding:18px 16px 14px;
+}
+.h1{
+  font-size:34px;
+  line-height:1.1;
+  margin:0 0 6px;
+  font-weight:1000;
+}
+.sub{
+  margin:0 0 16px;
+  color:rgba(234,246,255,.65);
+  font-size:13px;
+}
+.field{
+  margin-top:12px;
+}
+.label{
+  color:rgba(234,246,255,.55);
+  font-size:12px;
+  margin-bottom:6px;
+}
+.input{
+  width:100%;
+  border-radius:14px;
+  border:1px solid rgba(69,227,255,.18);
+  background:rgba(0,0,0,.25);
+  color:var(--white);
+  padding:14px 14px;
+  outline:none;
+}
+.input:focus{
+  border-color:rgba(69,227,255,.45);
+  box-shadow:0 0 0 3px rgba(69,227,255,.10);
+}
+.loginBtn{
+  margin-top:16px;
+  width:100%;
+  border:0;
+  border-radius:16px;
+  padding:14px 14px;
+  font-weight:1000;
+  letter-spacing:.5px;
+  cursor:pointer;
+  color:#0b1220;
+  background: linear-gradient(90deg, rgba(69,227,255,.85), rgba(47,107,255,.85), rgba(182,75,255,.75));
+  box-shadow: 0 16px 35px rgba(0,0,0,.35);
+}
+.loginBtn:active{transform:scale(.99)}
+.loginErr{
+  margin-top:10px;
+  font-size:12px;
+  color:rgba(255,75,75,.95);
+  min-height:16px;
+}
+.loginFoot{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px 14px;
+  border-top:1px solid rgba(69,227,255,.12);
+  color:rgba(234,246,255,.45);
+  font-size:11px;
+}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
 </style>
 </head>
-
 <body>
-<canvas id="matrix"></canvas>
-<!-- 🔐 ACCESS LOCK -->
-<div id="lockScreen" style="
-position:fixed;
-inset:0;
-background:black;
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:99999;
-font-family:Consolas,monospace;
-color:#22c55e;">
-  <div style="
-    border:1px solid #22c55e;
-    padding:20px;
-    border-radius:14px;
-    width:300px;
-    text-align:center;">
-    <h3>🔐 SYSTEM ACCESS</h3>
 
-    <select id="roleSelect" style="
-      width:100%;
-      padding:8px;
-      background:black;
-      color:#22c55e;
-      border:1px solid #22c55e;
-      margin-bottom:8px;">
-      <option value="user">USER</option>
-      <option value="admin">ADMIN</option>
-    </select>
+<canvas id="bg"></canvas>
 
-    <input id="accessCode"
-      placeholder="ENTER CODE"
-      style="
-        width:100%;
-        padding:10px;
-        background:black;
-        color:#22c55e;
-        border:1px solid #22c55e;
-        text-align:center;">
+<!-- LOGIN -->
+<div class="loginLayer" id="loginLayer">
+  <div class="loginWrap">
+    <div class="loginCard">
+      <div class="loginTop">
+        <div class="loginTitleRow">
+          <span class="loginDot"></span>
+          <span>77K • ACCESS</span>
+        </div>
+        <div class="loginBadge" id="loginBadge">TIME-LIMIT 02:00:00</div>
+      </div>
 
-    <button onclick="unlockApp()" style="
-      margin-top:10px;
-      width:100%;
-      padding:10px;
-      background:black;
-      color:#22c55e;
-      border:1px solid #22c55e;
-      font-weight:900;">
-      LOGIN
-    </button>
+      <div class="loginBody">
+        <h2 class="h1">Login System</h2>
+        <p class="sub">ใส่รหัสเพื่อเข้าใช้งาน </p>
 
-    <div id="lockError" style="color:#ef4444;font-size:12px;margin-top:6px"></div>
+        <div class="field">
+          <div class="label">Username</div>
+          <input class="input" id="loginUser" autocomplete="username" placeholder="เช่น username" />
+        </div>
+
+        <div class="field">
+          <div class="label">Password</div>
+          <input class="input" id="loginPass" type="password" autocomplete="current-password" placeholder="••••••" />
+        </div>
+
+        <button class="loginBtn" id="loginBtn">LOGIN</button>
+        <div class="loginErr" id="loginErr"></div>
+      </div>
+
+      <div class="loginFoot">
+        <div>© 77K UI</div>
+        <div class="mono">Session expires automatically</div>
+      </div>
+    </div>
   </div>
 </div>
-<!-- 🔐 END ACCESS LOCK -->
 
-<div class="app">
-  <div class="header">🤖 HACKER AI BACCARAT</div>
-  <div class="sub">ACCESS LEVEL: USER</div>
+<div class="overlayRoot">
+  <div class="app" id="app">
+    <div class="appHeader appDragHandle" id="dragHandle">
+      <div class="brand"><span class="logoDot"></span><span>77K • CYBER PREDICT UI</span></div>
+      <div class="chip chipStrong" id="stateChip">READY</div>
+    </div>
 
-  <div id="predBox" class="pred">
-    <div class="icon">🧠</div>
-    <div id="predText" class="text">BOOTING...</div>
-    <div id="predPct" class="pct"></div>
+    <div class="topRow">
+      <select id="roomSel"></select>
+      <div class="modePill">ROOM: <b id="roomName">C01</b></div>
+    </div>
+
+    <div class="core">
+      <div class="dialCard">
+        <div class="netLines"></div>
+
+        <div class="dialTop">
+          <div class="smallTag">SESSION: <b id="session">SEXY C01</b></div>
+          <div class="pctTag"><span id="pct">75</span>%</div>
+        </div>
+
+        <div class="ringWrap">
+          <div class="pulse"></div>
+          <div class="ring"></div>
+          <div class="pick" id="pick">
+            <div style="text-align:center">
+              <div class="letter" id="letter">P</div>
+              <div class="label" id="label">PLAYER</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bar"><div id="barFill"></div></div>
+        <div class="hint" id="hint"></div>
+
+        <div class="btnRow">
+          <button class="btnRound btnTie"  id="btnTie">เสมอ<small>TIE</small></button>
+          <button class="btnRound btnLose" id="btnLose">LOSE<small>แพ้</small></button>
+          <button class="btnRound btnWin"  id="btnWin">WIN<small>ชนะ</small></button>
+        </div>
+
+        <div class="stats">
+          <div class="statBox"><span>W:</span><b id="w">0</b></div>
+          <div class="statBox"><span>L:</span><b id="l">0</b></div>
+          <div class="statBox statWide">
+            <span class="badgeTiny">WR</span>
+            <span><b id="wr">0.0%</b></span>
+            <span style="margin-left:auto" class="badgeTiny" id="timeLeftBadge">TIME 02:00:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>MODE: <b id="mode">MODEL</b> • <span id="userTag">GUEST</span></div>
+      <div class="footerRight">
+        <button class="linkBtn" id="btnSignOut">SIGN OUT</button>
+        <span>TIP: ลากหัวแถบเพื่อย้ายตำแหน่ง</span>
+      </div>
+    </div>
   </div>
 
-  <div id="status" class="status">SYSTEM INIT...</div>
-  <div class="progress"><div id="bar"></div></div>
-
-  <div id="history" class="history"></div>
-  <div id="dna" class="dna"></div>
-
-  <div class="panel">
-    📊 WINRATE :
-    <span id="wr">0%</span> |
-    W:<span id="w">0</span>
-    L:<span id="l">0</span> |
-    SYNC:<span id="sync">0%</span>
+  <div class="pop" id="pop">
+    <div class="popCard" id="popCard">
+      <div class="popTitle" id="popTitle">SEXY ห้อง C01</div>
+      <div class="popBig" id="popBig">พร้อม</div>
+      <div class="popSub" id="popSub">Overlay </div>
+    </div>
   </div>
 
-  <div class="controls">
-    <button onclick="add('P')">PLAYER</button>
-    <button onclick="add('B')">BANKER</button>
-    <button onclick="add('T')">TIE</button>
-    <button onclick="undo()">UNDO</button>
-    <button onclick="resetAll()">RESET</button>
-    <button onclick="enableVoice()">VOICE</button>
-  </div>
-
-  <div class="voice">
-    <button onclick="lang='th'">TH</button>
-    <button onclick="lang='en'">EN</button>
-    <button onclick="gender=gender==='male'?'female':'male'">VOICE TYPE</button>
-  </div>
-
-  <div class="footer">AI HACK BY FLUKE1688</div>
+  <div class="dragHint">ลาก “หัวแถบ” เพื่อย้ายหน้าต่าง</div>
 </div>
 
 <script>
-/* MATRIX */
-const c=document.getElementById("matrix"),ctx=c.getContext("2d");
-c.width=innerWidth;c.height=innerHeight;
-let speed=50;
-const chars="01AIHACK";
-const drops=Array(Math.floor(c.width/14)).fill(1);
-setInterval(()=>{
-  ctx.fillStyle="rgba(0,0,0,0.08)";
-  ctx.fillRect(0,0,c.width,c.height);
-  ctx.fillStyle="#22c55e";
-  ctx.font="14px monospace";
-  drops.forEach((y,i)=>{
-    ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*14,y*14);
-    if(y*14>c.height&&Math.random()>0.97)drops[i]=0;
-    drops[i]++;
-  });
-},speed);
+/* =========================
+   CONFIG (Supabase optional)
+   =========================
+   - ถ้าคุณมี Supabase RPC login_user แล้ว: ใส่ PROJECT_ID + ANON_KEY ให้ถูก
+   - ถ้ายังไม่มี: ระบบจะ fallback เป็น demo user: admin / 1234
+*/
+const SUPABASE_PROJECT_ID = "yaqpzpwhvkmhyvisabmd"; // <- ของคุณ
+const SUPABASE_ANON_KEY = "sb_publishable_JcnhWdcidBrWz0Re5jZ2Fw_byjg0QCJ"; // <- ของคุณ (แนะนำ rotate ถ้าปล่อยต่อสาธารณะ)
+const SUPABASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co`;
+const RPC_LOGIN = `${SUPABASE_URL}/rest/v1/rpc/login_user`;
 
-/* SYSTEM */
-let h=[],dna=[],pred=null,win=0,loss=0,busy=false;
-let lang='th',gender='male',voices=[],voiceReady=false;
+const TIME_LIMIT_SECONDS_DEFAULT = 2 * 60 * 60; // 2 ชั่วโมง (ฝั่งหน้าเว็บ)
 
-/* 🔐 ADMIN */
-let ADMIN=false;
-let OVERRIDE=false;
-let loseStreak=0;
+/* ========= Background particles ========= */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; }
+resize(); addEventListener("resize", resize);
 
-/* ADMIN TOGGLE */
-let tap=0;
-document.querySelector('.header').onclick=()=>{
-  tap++;
-  if(tap>=5){
-    ADMIN=!ADMIN;
-    tap=0;
-    document.querySelector('.sub').textContent=
-      ADMIN?'ACCESS LEVEL: ROOT':'ACCESS LEVEL: USER';
-    document.getElementById('predBox').classList.toggle('pulse',ADMIN);
+function rand(){
+  try{
+    const a=new Uint32Array(1);
+    crypto.getRandomValues(a);
+    return a[0]/0xffffffff;
+  }catch(e){
+    return Math.random();
   }
-};
-
-function overrideAI(){
-  if(!ADMIN) return;
-  OVERRIDE=!OVERRIDE;
-  status.textContent=OVERRIDE?'AI OVERRIDE ENABLED':'AI OVERRIDE OFF';
 }
 
-document.addEventListener('keydown',e=>{
-  if(e.key==='o') overrideAI();
+const pts = Array.from({length: 70}, ()=>({
+  x: rand()*innerWidth,
+  y: rand()*innerHeight,
+  vx: (rand()-.5)*0.35,
+  vy: (rand()-.5)*0.35,
+  r: 1 + rand()*2
+}));
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="rgba(69,227,255,.10)";
+  pts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0||p.x>innerWidth) p.vx*=-1;
+    if(p.y<0||p.y>innerHeight) p.vy*=-1;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+  });
+  ctx.strokeStyle="rgba(69,227,255,.06)";
+  for(let i=0;i<pts.length;i++){
+    for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+      const d=Math.hypot(dx,dy);
+      if(d<140){
+        ctx.globalAlpha = (1 - d/140) * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(pts[i].x,pts[i].y);
+        ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha=1;
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ========= UI refs ========= */
+const roomSel = document.getElementById("roomSel");
+const roomName = document.getElementById("roomName");
+const stateChip = document.getElementById("stateChip");
+const pctEl = document.getElementById("pct");
+const barFill = document.getElementById("barFill");
+const letterEl = document.getElementById("letter");
+const labelEl = document.getElementById("label");
+const sessionEl = document.getElementById("session");
+
+const wEl = document.getElementById("w");
+const lEl = document.getElementById("l");
+const wrEl = document.getElementById("wr");
+
+const popCard = document.getElementById("popCard");
+const popTitle = document.getElementById("popTitle");
+const popBig = document.getElementById("popBig");
+const popSub = document.getElementById("popSub");
+
+const hintEl = document.getElementById("hint");
+const btnSignOut = document.getElementById("btnSignOut");
+const userTag = document.getElementById("userTag");
+const timeLeftBadge = document.getElementById("timeLeftBadge");
+
+/* ========= Login refs ========= */
+const loginLayer = document.getElementById("loginLayer");
+const loginBadge = document.getElementById("loginBadge");
+const loginUser = document.getElementById("loginUser");
+const loginPass = document.getElementById("loginPass");
+const loginBtn  = document.getElementById("loginBtn");
+const loginErr  = document.getElementById("loginErr");
+
+/* ========= State ========= */
+let room="C01";
+let session = `SEXY ${room}`;
+let pct=75;
+let pick="P"; // P/B only
+
+// stats (reset when change room)
+let W=0, L=0;
+
+/* ========= Session (frontend time limit) ========= */
+const STORAGE_KEY = "77k_session_v1";
+let countdownTimer = null;
+
+function fmtTime(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const h = String(Math.floor(sec/3600)).padStart(2,"0");
+  const m = String(Math.floor((sec%3600)/60)).padStart(2,"0");
+  const s = String(sec%60).padStart(2,"0");
+  return `${h}:${m}:${s}`;
+}
+function setBadgesLeft(sec){
+  const t = fmtTime(sec);
+  loginBadge.textContent = `TIME-LIMIT ${t}`;
+  timeLeftBadge.textContent = `TIME ${t}`;
+}
+setBadgesLeft(TIME_LIMIT_SECONDS_DEFAULT);
+
+function saveSession(obj){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+}
+function loadSession(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function clearSession(){
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+function showLogin(msg){
+  // หยุดนับถอยหลัง
+  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
+  userTag.textContent = "GUEST";
+ loginErr.textContent = msg || "";
+  loginLayer.style.display = "block";
+}
+function hideLogin(){
+  loginErr.textContent = "";
+  loginLayer.style.display = "none";
+}
+
+function startCountdown(expMs){
+  if(countdownTimer) clearInterval(countdownTimer);
+
+  function tick(){
+    const leftSec = Math.floor((expMs - Date.now())/1000);
+    setBadgesLeft(leftSec);
+
+    if(leftSec <= 0){
+      // หมดเวลา -> เด้งกลับ login
+      doLogout("หมดเวลาใช้งานแล้ว");
+    }
+  }
+  tick();
+  countdownTimer = setInterval(tick, 1000);
+}
+
+function doLogout(reason){
+  clearSession();
+  showLogin(reason ? `⏳ ${reason}` : "");
+  flash("LOCKED");
+}
+
+/* ========= Supabase login (optional) ========= */
+async function supabaseLogin(username, password){
+  // ถ้า Project ID / Key ไม่ใส่ หรือไม่อยากใช้จริง -> return null เพื่อ fallback
+  if(!SUPABASE_PROJECT_ID || !SUPABASE_ANON_KEY) return null;
+
+  // ถ้าไม่มีฟังก์ชันใน supabase จะ throw -> fallback demo
+  const res = await fetch(RPC_LOGIN, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      p_username: username,
+      p_password: password,
+      p_device_id: getDeviceId()
+    })
+  });
+
+  // 404/401/500 -> ถือว่า rpc ยังไม่พร้อม
+  if(!res.ok){
+    const txt = await res.text().catch(()=> "");
+    throw new Error(`RPC login_user error: ${res.status} ${txt}`);
+  }
+
+  const data = await res.json();
+
+  // รองรับหลายรูปแบบ (เผื่อคุณ return json ไม่เหมือนกัน)
+  // คาดหวังประมาณ: { ok:true, username:'...', expires_at:'2026-..', session_seconds:7200 }
+  if(data && (data.ok === true || data.success === true)){
+    return data;
+  }
+  // ถ้า return มาเป็น object แต่ไม่ ok
+  return data || null;
+}
+
+function getDeviceId(){
+  // device id แบบง่ายๆ (ฝั่งหน้าเว็บ)
+  const k="77k_device_id_v1";
+  let v = localStorage.getItem(k);
+  if(!v){
+    v = "dev_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+    localStorage.setItem(k, v);
+  }
+  return v;
+}
+
+async function handleLogin(){
+  const u = (loginUser.value || "").trim();
+  const p = (loginPass.value || "").trim();
+
+  if(!u || !p){
+    loginErr.textContent = "กรุณากรอก Username / Password";
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = "CHECKING...";
+  loginErr.textContent = "";
+
+  // 1) ลอง Supabase ก่อน
+  try{
+    const sb = await supabaseLogin(u, p);
+    if(sb && (sb.ok === true || sb.success === true)){
+      // ถ้า server ส่ง expires_at มา -> ใช้ตามนั้น ไม่งั้นใช้ 2 ชั่วโมง
+      let expMs = 0;
+      if(sb.expires_at){
+        expMs = new Date(sb.expires_at).getTime();
+      }else if(sb.session_seconds){
+        expMs = Date.now() + (Number(sb.session_seconds) * 1000);
+      }else{
+        expMs = Date.now() + (TIME_LIMIT_SECONDS_DEFAULT * 1000);
+      }
+
+      saveSession({
+        username: sb.username || u,
+        expMs
+      });
+
+      userTag.textContent = (sb.username || u);
+      hideLogin();
+      startCountdown(expMs);
+      pop("เข้าสู่ระบบ", "#111", "ยืนยันสิทธิ์เรียบร้อย");
+      loginBtn.disabled = false;
+      loginBtn.textContent = "LOGIN";
+      return;
+    }
+
+    // ถ้า sb ไม่ ok -> แสดง msg ถ้ามี
+    if(sb && (sb.message || sb.error)){
+      loginErr.textContent = sb.message || sb.error;
+      loginBtn.disabled = false;
+      loginBtn.textContent = "LOGIN";
+      return;
+    }
+
+  }catch(e){
+    // 2) fallback demo (กันพังตอน rpc ยังไม่พร้อม)
+    // demo credentials: admin / 1234
+    if(u === "admin" && p === "1234"){
+      const expMs = Date.now() + (TIME_LIMIT_SECONDS_DEFAULT * 1000);
+      saveSession({ username: u, expMs, demo:true });
+      userTag.textContent = u + " (DEMO)";
+      hideLogin();
+      startCountdown(expMs);
+      pop("เข้าสู่ระบบ", "#111", "DEMO MODE (RPC ยังไม่พร้อม)");
+      loginBtn.disabled = false;
+      loginBtn.textContent = "LOGIN";
+      return;
+    }
+
+    loginErr.textContent = "ล็อกอินไม่ได้ (RPC ยังไม่พร้อม หรือรหัสไม่ถูกต้อง)";
+    // ถ้าอยากเห็น error จริงๆ ให้แกะบรรทัดนี้:
+    // loginErr.textContent = String(e?.message || e);
+    loginBtn.disabled = false;
+    loginBtn.textContent = "LOGIN";
+    return;
+  }
+
+  loginBtn.disabled = false;
+  loginBtn.textContent = "LOGIN";
+}
+
+loginBtn.addEventListener("click", handleLogin);
+loginPass.addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleLogin(); });
+loginUser.addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleLogin(); });
+
+btnSignOut.addEventListener("click", ()=> doLogout("ออกจากระบบแล้ว"));
+
+/* ========= Rooms ========= */
+function fillRooms(){
+  roomSel.innerHTML="";
+  const list=[];
+  for(let i=1;i<=16;i++) list.push(`C${String(i).padStart(2,'0')}`);
+  for(let i=1;i<=10;i++) list.push(`B${i}`);
+  list.forEach(r=>{
+    const o=document.createElement("option");
+    o.value=r; o.textContent=r;
+    roomSel.appendChild(o);
+  });
+  roomSel.value=room;
+}
+fillRooms();
+
+roomSel.addEventListener("change", ()=>{
+  room = roomSel.value;
+  roomName.textContent = room;
+
+  // session ให้ตรงกับห้อง
+  session = `SEXY ${room}`;
+  sessionEl.textContent = session;
+
+  // เปลี่ยนห้อง = รีเซตสถิติใหม่ทั้งหมด
+  W=0; L=0;
+  renderStats();
+
+  // เปลี่ยนห้องแล้วสุ่มคำทำนายใหม่ (กันค้าง P)
+  scanAndNewPick(`เปลี่ยนห้อง: ${room}`);
 });
 
-/* VOICE */
-function enableVoice(){
-  speechSynthesis.cancel();
-  speechSynthesis.speak(new SpeechSynthesisUtterance(''));
-  voices=speechSynthesis.getVoices();
-  speechSynthesis.onvoiceschanged=()=>voices=speechSynthesis.getVoices();
-  voiceReady=true;
+/* ========= Helpers ========= */
+function setPick(p){
+  pick=p;
+  letterEl.textContent = p;
+  labelEl.textContent = p==="P" ? "PLAYER" : "BANKER";
 }
 
-function speak(side,isWin){
-  if(!voiceReady) return;
-  let t='';
-  if(lang==='th'){
-    t=isWin?(side==='P'?'ผู้เล่นชนะ':'แบงค์เกอร์ชนะ')
-           :(side==='P'?'ผู้เล่นแพ้':'แบงค์เกอร์แพ้');
-  }else{
-    t=isWin?(side==='P'?'Player wins':'Banker wins')
-           :(side==='P'?'Player loses':'Banker loses');
-  }
-  const u=new SpeechSynthesisUtterance(t);
-  u.lang=lang==='th'?'th-TH':'en-US';
-  u.pitch=gender==='female'?1.3:0.8;
-  speechSynthesis.speak(u);
+function setPct(v){
+  pct = Math.max(50, Math.min(99, v));
+  pctEl.textContent = pct;
+  barFill.style.width = pct + "%";
 }
 
-/* SCAN */
-function scanning(cb){
-  busy=true;
-  let p=0;
-  bar.style.width='0%';
-  const i=setInterval(()=>{
-    p+=10;
-    bar.style.width=p+'%';
-    sync.textContent=p+'%';
-    if(p>=100){
-      clearInterval(i);
-      busy=false;
-      cb();
-    }
-  },140);
+function flash(txt){
+  stateChip.textContent = txt;
+  clearTimeout(flash._t);
+  flash._t=setTimeout(()=>{ stateChip.textContent = "READY"; }, 700);
 }
 
-/* PREDICT */
-function predict(){
-  if(h.length<10){
-    predText.textContent='WAIT';
-    predPct.textContent='';
+function pop(text, color, sub){
+  popTitle.textContent = `${session} • ห้อง ${room}`;
+  popBig.textContent = text;
+  popBig.style.color = color || "#111";
+  popSub.textContent = sub || "Overlay AI 2026 พร้อมใช้งาน";
+  popCard.classList.add("show");
+  clearTimeout(pop._t);
+  pop._t=setTimeout(()=>popCard.classList.remove("show"), 1400);
+}
+
+function renderStats(){
+  wEl.textContent = String(W);
+  lEl.textContent = String(L);
+  const total = W + L;
+  const wr = total ? (W/total)*100 : 0;
+  wrEl.textContent = wr.toFixed(1) + "%";
+}
+
+/* ========= Predict (P/B only) ========= */
+function newPick(){
+  const p = rand()<0.5 ? "P" : "B";
+  setPick(p);
+  setPct(65 + Math.floor(rand()*31)); // 65-95
+}
+
+function scanAndNewPick(reason){
+  flash("SCANNING");
+  pop("สแกน...", "#111", reason || "กำลังสุ่มคำทำนายใหม่");
+  setTimeout(()=>{
+    newPick();
+    flash("READY");
+    pop(pick==="P" ? "แนะนำ: PLAYER" : "แนะนำ: BANKER", "#111", `CONF ${pct}%`);
+  }, 420);
+}
+
+/* ========= Buttons ========= */
+document.getElementById("btnWin").addEventListener("click", ()=>{
+  // ถ้าไม่ได้ล็อกอิน ให้เด้งไปล็อกอิน
+  if(!isAuthed()) return showLogin("กรุณา Login ก่อนใช้งาน");
+
+  W++;
+  renderStats();
+  pop("ชนะ", "#16a34a", "บันทึกผลแล้ว");
+  scanAndNewPick("อัปเดตคำทำนาย (P/B)");
+});
+
+document.getElementById("btnLose").addEventListener("click", ()=>{
+  if(!isAuthed()) return showLogin("กรุณา Login ก่อนใช้งาน");
+
+  L++;
+  renderStats();
+  pop("แพ้", "#dc2626", "บันทึกผลแล้ว");
+  scanAndNewPick("อัปเดตคำทำนาย (P/B)");
+});
+
+document.getElementById("btnTie").addEventListener("click", ()=>{
+  if(!isAuthed()) return showLogin("กรุณา Login ก่อนใช้งาน");
+
+  // เสมอ: ไม่คิด W/L
+  pop("เสมอ", "#0284c7", "ไม่คิด W/L");
+  scanAndNewPick("อัปเดตคำทำนาย (P/B)");
+});
+
+function isAuthed(){
+  const s = loadSession();
+  if(!s || !s.expMs) return false;
+  return Date.now() < Number(s.expMs);
+}
+
+/* ========= init ========= */
+roomName.textContent = room;
+sessionEl.textContent = session;
+renderStats();
+setPick("P");
+setPct(75);
+hintEl.textContent = "";
+pop("พร้อม", "#111", "");
+
+/* ========= draggable window (drag header) ========= */
+const app = document.getElementById("app");
+const handle = document.getElementById("dragHandle");
+let dragging=false, sx=0, sy=0, baseX=0, baseY=0;
+
+function getTranslate(el){
+  const t = getComputedStyle(el).transform;
+  if(!t || t==="none") return {x:0,y:0};
+  const m = new DOMMatrixReadOnly(t);
+  return {x:m.m41, y:m.m42};
+}
+
+handle.addEventListener("pointerdown", (e)=>{
+  dragging=true;
+  handle.setPointerCapture(e.pointerId);
+  sx=e.clientX; sy=e.clientY;
+  const t=getTranslate(app);
+  baseX=t.x; baseY=t.y;
+  handle.style.cursor="grabbing";
+  e.preventDefault();
+});
+
+handle.addEventListener("pointermove", (e)=>{
+  if(!dragging) return;
+  const dx=e.clientX-sx;
+  const dy=e.clientY-sy;
+  let nx=baseX+dx, ny=baseY+dy;
+  nx=Math.max(-10, Math.min(innerWidth-120, nx));
+  ny=Math.max(-10, Math.min(innerHeight-140, ny));
+  app.style.transform=`translate(${nx}px, ${ny}px)`;
+});
+
+handle.addEventListener("pointerup", ()=>{
+  dragging=false;
+  handle.style.cursor="grab";
+});
+
+/* ========= Boot: restore session or show login ========= */
+(function boot(){
+  const s = loadSession();
+  if(!s || !s.expMs){
+    showLogin("");
     return;
   }
-  scanning(()=>{
-    pred=Math.random()<0.5?'P':'B';
-    if(OVERRIDE) pred=pred==='P'?'B':'P';
-    predText.textContent=pred==='P'?'PLAYER':'BANKER';
-    predPct.textContent=(60+Math.random()*30).toFixed(1)+'%';
-    predBox.classList.add('glitch');
-    setTimeout(()=>predBox.classList.remove('glitch'),300);
-  });
-}
-
-/* ADD */
-function add(x){
-  if(busy) return;
-  h.push(x);
-  if(pred && x!=='T'){
-    if(x===pred){
-      win++; dna.push('√'); speak(x,true); loseStreak=0;
-      document.body.classList.remove('alert');
-    }else{
-      loss++; dna.push('×'); speak(x,false); loseStreak++;
-      if(loseStreak>=3) document.body.classList.add('alert');
-    }
-  }
-  render(); predict();
-}
-
-function undo(){
-  if(busy) return;
-  const r=dna.pop();
-  if(r==='√')win--;
-  if(r==='×')loss--;
-  h.pop();
-  render(); predict();
-}
-
-function resetAll(){
-  h=[];dna=[];pred=null;win=0;loss=0;loseStreak=0;
-  document.body.classList.remove('alert');
-  render(); predict();
-}
-
-function render(){
-  history.innerHTML=''; dnaBox.innerHTML='';
-  h.forEach(x=>{
-    let e=document.createElement('div');
-    e.className='box '+x; e.textContent=x;
-    history.appendChild(e);
-  });
-  dna.forEach(x=>{
-    let e=document.createElement('div');
-    e.className='box '+(x==='√'?'win':'lose'); e.textContent=x;
-    dnaBox.appendChild(e);
-  });
-  w.textContent=win; l.textContent=loss;
-  wr.textContent=(win+loss?((win/(win+loss))*100).toFixed(1):0)+'%';
-}
-
-const history=document.getElementById('history');
-const dnaBox=document.getElementById('dna');
-const predText=document.getElementById('predText');
-const predPct=document.getElementById('predPct');
-const predBox=document.getElementById('predBox');
-const status=document.getElementById('status');
-const bar=document.getElementById('bar');
-const w=document.getElementById('w');
-const l=document.getElementById('l');
-const wr=document.getElementById('wr');
-const sync=document.getElementById('sync');
-/* ===============================
-   🔐 USER / ADMIN ACCESS
-   =============================== */
-
-const USER_CODE  = "1256";
-const ADMIN_CODE = "5555";
-const EXPIRE_TIME = new Date("2026-011-31T23:59:59");
-
-function unlockApp(){
-  const role = document.getElementById("roleSelect").value;
-  const code = document.getElementById("accessCode").value;
-
-  if(new Date() > EXPIRE_TIME){
-    lockError.textContent = "⛔ ACCESS EXPIRED";
+  if(Date.now() >= Number(s.expMs)){
+    doLogout("หมดเวลาใช้งานแล้ว");
     return;
   }
-
-  if(role === "user" && code === USER_CODE){
-    lockScreen.style.display = "none";
-    ADMIN = false;
-    document.querySelector('.sub').textContent = "ACCESS LEVEL: USER";
-    return;
-  }
-
-  if(role === "admin" && code === ADMIN_CODE){
-    lockScreen.style.display = "none";
-    ADMIN = true;
-    document.querySelector('.sub').textContent = "ACCESS LEVEL: ROOT";
-    document.getElementById('predBox').classList.add('pulse');
-    return;
-  }
-
-  lockError.textContent = "❌ INVALID CODE";
-}
+  userTag.textContent = s.username || "USER";
+  hideLogin();
+  startCountdown(Number(s.expMs));
+})();
 </script>
 </body>
 </html>
-
-
-
-
-
-
